@@ -1,42 +1,45 @@
 # IMIC Robot — Pi Camera Stream
 
-Stream MJPEG từ camera Raspberry Pi, public hóa qua Cloudflare Tunnel để nhúng vào dashboard.
+Stream MJPEG từ camera Raspberry Pi, public hóa qua ngrok (static domain) để nhúng vào dashboard.
 
-## Cài đặt trên Pi
+## Cài đặt trên Pi mới (one-shot)
 
 ```bash
-git clone <repo-url> imic-pi-camera
+git clone https://github.com/DomainJin/imic-pi-camera.git
 cd imic-pi-camera
 chmod +x install.sh
 ./install.sh
 ```
 
-Sau khi chạy, stream có tại `http://<pi-ip>:8080/stream.mjpg` (LAN).
+Script sẽ tự động:
+1. Cài `python3-picamera2`, `python3-flask`, `python3-opencv`, `ngrok`
+2. Hỏi **ngrok authtoken** và **static domain** (xem bên dưới cách lấy)
+3. Tạo và bật 2 service systemd: `cam_stream` (stream camera) và `ngrok` (tunnel public)
 
-## Public hóa bằng Cloudflare Tunnel
+Sau khi chạy xong, script sẽ in ra URL LAN và URL public.
 
-```bash
-curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm -o cloudflared
-chmod +x cloudflared && sudo mv cloudflared /usr/local/bin/
-cloudflared tunnel --url http://localhost:8080
+## Lấy ngrok authtoken & static domain
+
+1. Tạo tài khoản tại https://ngrok.com (có thể đăng nhập bằng Google)
+2. Vào **Dashboard -> Your Authtoken**, copy token
+3. Vào **Dashboard -> Domains -> + Create Domain**, tạo 1 static domain miễn phí (vd: `xxxx.ngrok-free.dev`)
+
+## Cập nhật dashboard
+
+Nếu domain public mới khác với domain cũ, cập nhật `CAMERA_STREAM_URL` trong
+`dashboard/index.html` (repo `IMIC-FINAL_PROJECT`) thành:
+
 ```
-
-Copy URL `https://xxxx-xxxx.trycloudflare.com` được in ra, dùng URL này (`+ /stream.mjpg`) trong dashboard.
-
-### Chạy tunnel nền vĩnh viễn (tuỳ chọn)
-Để URL không đổi mỗi lần restart, đăng nhập Cloudflare account và tạo named tunnel:
-
-```bash
-cloudflared tunnel login
-cloudflared tunnel create imic-pi-camera
-cloudflared tunnel route dns imic-pi-camera camera.yourdomain.com
-cloudflared tunnel run imic-pi-camera
+https://<domain-moi>/stream.mjpg
 ```
 
 ## Quản lý service
 
 ```bash
 sudo systemctl status cam_stream
+sudo systemctl status ngrok
 sudo systemctl restart cam_stream
+sudo systemctl restart ngrok
 journalctl -u cam_stream -f
+journalctl -u ngrok -f
 ```
