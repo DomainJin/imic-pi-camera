@@ -21,7 +21,9 @@ def gen_frames():
 
 @app.route("/stream.mjpg")
 def stream():
-    return Response(gen_frames(), mimetype="multipart/x-mixed-replace; boundary=frame")
+    resp = Response(gen_frames(), mimetype="multipart/x-mixed-replace; boundary=frame")
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
 
 
 @app.route("/")
