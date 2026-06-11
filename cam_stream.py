@@ -32,6 +32,21 @@ def stream():
     return resp
 
 
+@app.route("/snapshot.jpg", methods=["GET", "OPTIONS"])
+def snapshot():
+    if request.method == "OPTIONS":
+        resp = app.make_default_options_response()
+    else:
+        frame = picam2.capture_array()
+        _, buf = cv2.imencode(".jpg", frame)
+        resp = Response(buf.tobytes(), mimetype="image/jpeg")
+
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    resp.headers["Access-Control-Allow-Headers"] = "ngrok-skip-browser-warning"
+    resp.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    return resp
+
+
 @app.route("/")
 def index():
     return '<img src="/stream.mjpg" style="width:100%">'
