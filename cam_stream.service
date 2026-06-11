@@ -1,0 +1,12 @@
+[Unit]
+Description=IMIC Robot Camera Stream
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/pi/imic-pi-camera/cam_stream.py
+WorkingDirectory=/home/pi/imic-pi-camera
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
