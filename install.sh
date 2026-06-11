@@ -10,10 +10,16 @@ sudo apt install -y python3-picamera2 python3-flask python3-opencv curl
 
 echo "=== 2/4: Cài ngrok (nếu chưa có) ==="
 if ! command -v ngrok >/dev/null 2>&1; then
-    curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
-    echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list >/dev/null
-    sudo apt update
-    sudo apt install -y ngrok
+    case "$(uname -m)" in
+        armv6l|armv7l) NGROK_ARCH="arm" ;;
+        aarch64)       NGROK_ARCH="arm64" ;;
+        x86_64)        NGROK_ARCH="amd64" ;;
+        *) echo "Kiến trúc $(uname -m) chưa hỗ trợ tự động, cài ngrok thủ công."; exit 1 ;;
+    esac
+
+    curl -sSL "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-${NGROK_ARCH}.tgz" -o /tmp/ngrok.tgz
+    sudo tar -xzf /tmp/ngrok.tgz -C /usr/local/bin
+    rm -f /tmp/ngrok.tgz
 else
     echo "ngrok đã có sẵn, bỏ qua."
 fi
