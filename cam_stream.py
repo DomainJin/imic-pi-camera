@@ -4,15 +4,18 @@ import cv2
 
 app = Flask(__name__)
 
+JPEG_QUALITY = 50
+ENCODE_PARAMS = [int(cv2.IMWRITE_JPEG_QUALITY), JPEG_QUALITY]
+
 picam2 = Picamera2()
-picam2.configure(picam2.create_video_configuration(main={"size": (640, 480)}))
+picam2.configure(picam2.create_video_configuration(main={"size": (320, 240)}))
 picam2.start()
 
 
 def gen_frames():
     while True:
         frame = picam2.capture_array()
-        _, buf = cv2.imencode(".jpg", frame)
+        _, buf = cv2.imencode(".jpg", frame, ENCODE_PARAMS)
         yield (
             b"--frame\r\n"
             b"Content-Type: image/jpeg\r\n\r\n" + buf.tobytes() + b"\r\n"
@@ -38,7 +41,7 @@ def snapshot():
         resp = app.make_default_options_response()
     else:
         frame = picam2.capture_array()
-        _, buf = cv2.imencode(".jpg", frame)
+        _, buf = cv2.imencode(".jpg", frame, ENCODE_PARAMS)
         resp = Response(buf.tobytes(), mimetype="image/jpeg")
 
     resp.headers["Access-Control-Allow-Origin"] = "*"
