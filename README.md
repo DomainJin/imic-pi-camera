@@ -12,6 +12,7 @@ chmod +x install.sh
 ```
 
 Script sẽ tự động:
+
 1. Cài `python3-picamera2`, `python3-flask`, `python3-opencv`, `ngrok`
 2. Hỏi **ngrok authtoken** và **static domain** (xem bên dưới cách lấy)
 3. Tạo và bật 2 service systemd: `cam_stream` (stream camera) và `ngrok` (tunnel public)
@@ -43,3 +44,5 @@ sudo systemctl restart ngrok
 journalctl -u cam_stream -f
 journalctl -u ngrok -f
 ```
+
+3Ezso4K7KMmzZqFIwk0JMYtUWfz_6xxPDU5gd4gcFBrj5S6Wk
