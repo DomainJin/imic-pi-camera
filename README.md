@@ -46,3 +46,5 @@ journalctl -u ngrok -f
 ```
 
 3Ezso4K7KMmzZqFIwk0JMYtUWfz_6xxPDU5gd4gcFBrj5S6Wk
+http --url=swimmable-abstract-dreamboat.ngrok-free.dev 8080
+swimmable-abstract-dreamboat
