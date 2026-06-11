@@ -1,4 +1,4 @@
-from flask import Flask, Response
+from flask import Flask, Response, request
 from picamera2 import Picamera2
 import cv2
 
@@ -19,10 +19,16 @@ def gen_frames():
         )
 
 
-@app.route("/stream.mjpg")
+@app.route("/stream.mjpg", methods=["GET", "OPTIONS"])
 def stream():
-    resp = Response(gen_frames(), mimetype="multipart/x-mixed-replace; boundary=frame")
+    if request.method == "OPTIONS":
+        resp = app.make_default_options_response()
+    else:
+        resp = Response(gen_frames(), mimetype="multipart/x-mixed-replace; boundary=frame")
+
     resp.headers["Access-Control-Allow-Origin"] = "*"
+    resp.headers["Access-Control-Allow-Headers"] = "ngrok-skip-browser-warning"
+    resp.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
     return resp
 
 
