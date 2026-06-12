@@ -1,6 +1,6 @@
 # IMIC Robot — Pi Camera Stream
 
-Stream MJPEG từ camera Raspberry Pi, public hóa qua ngrok (static domain) để nhúng vào dashboard.
+Stream snapshot JPEG từ camera Raspberry Pi, public hóa qua Cloudflare Tunnel (domain riêng) để nhúng vào dashboard.
 
 ## Cài đặt trên Pi mới (one-shot)
 
@@ -13,34 +13,36 @@ chmod +x install.sh
 
 Script sẽ tự động:
 
-1. Cài `python3-picamera2`, `python3-flask`, `python3-opencv`, `ngrok`
-2. Hỏi **ngrok authtoken** và **static domain** (xem bên dưới cách lấy)
-3. Tạo và bật 2 service systemd: `cam_stream` (stream camera) và `ngrok` (tunnel public)
+1. Cài `python3-picamera2`, `python3-flask`, `python3-opencv`, `cloudflared`
+2. Đăng nhập Cloudflare (mở link, chọn domain của bạn trên Cloudflare)
+3. Tạo tunnel, route DNS tới hostname bạn chọn (vd: `camera.domainjin.io.vn`)
+4. Tạo và bật 2 service systemd: `cam_stream` (stream camera) và `cloudflared` (tunnel public)
 
 Sau khi chạy xong, script sẽ in ra URL LAN và URL public.
 
-## Lấy ngrok authtoken & static domain
+## Yêu cầu trước khi cài
 
-1. Tạo tài khoản tại https://ngrok.com (có thể đăng nhập bằng Google)
-2. Vào **Dashboard -> Your Authtoken**, copy token
-3. Vào **Dashboard -> Domains -> + Create Domain**, tạo 1 static domain miễn phí (vd: `xxxx.ngrok-free.dev`)
+- Domain của bạn phải được quản lý qua Cloudflare DNS (nameserver trỏ về Cloudflare).
+- Trên Cloudflare Dashboard, vào **Caching -> Cache Rules**, tạo rule bypass cache
+  cho hostname camera (vd: `camera.domainjin.io.vn`), nếu không ảnh sẽ bị cache 4 giờ
+  và không cập nhật.
 
 ## Cập nhật dashboard
 
-Nếu domain public mới khác với domain cũ, cập nhật `CAMERA_STREAM_URL` trong
-`dashboard/index.html` (repo `IMIC-FINAL_PROJECT`) thành:
+Nếu hostname public mới khác với hostname cũ, cập nhật `SNAPSHOT_URL` trong
+`dashboard/api/camera.js` (repo `IMIC-FINAL_PROJECT`) thành:
 
 ```
-https://<domain-moi>/stream.mjpg
+https://<hostname-moi>/snapshot.jpg
 ```
 
 ## Quản lý service
 
 ```bash
 sudo systemctl status cam_stream
-sudo systemctl status ngrok
+sudo systemctl status cloudflared
 sudo systemctl restart cam_stream
-sudo systemctl restart ngrok
+sudo systemctl restart cloudflared
 journalctl -u cam_stream -f
-journalctl -u ngrok -f
+journalctl -u cloudflared -f
 ```
